@@ -161,8 +161,6 @@ public class ViewRole2Home {
 		label_UserDetails.setText("User: " + theUser.getUserName());
 		setupLabelUI(label_UserDetails, "Arial", 20, width, Pos.BASELINE_LEFT, 20, 55);
 		
-		setupButtonUI(button_UpdateThisUser, "Dialog", 18, 170, Pos.CENTER, 610, 45);
-		button_UpdateThisUser.setOnAction((event) -> {ControllerRole2Home.performUpdate(); });
 		
 		// GUI Area 2
 		

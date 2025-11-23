@@ -11,12 +11,9 @@ public class ControllerRole2Home {
 	
 	protected static void performViewPost() {
 	    guiPosts.ViewPosts.displayPosts(ViewRole2Home.theStage, ViewRole2Home.theUser);
+	    guiPosts.ControllerPosts.performViewPosts();
+	    
 	}
-	
-	protected static void performUpdate () {
-		guiUserUpdate.ViewUserUpdate.displayUserUpdate(ViewRole2Home.theStage, ViewRole2Home.theUser);
-	}	
-
 	
 	protected static void performLogout() {
 		guiUserLogin.ViewUserLogin.displayUserLogin(ViewRole2Home.theStage);

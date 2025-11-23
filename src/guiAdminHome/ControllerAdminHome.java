@@ -113,7 +113,7 @@ public class ControllerAdminHome {
 	}
 	
 	protected static void performViewPost() {
-		guiPosts.ViewPosts.displayPosts(ViewAdminHome.theStage, ViewAdminHome.theUser);
+	    guiPostsAdmin.ViewPostsAdmin.displayPostsAdmin(ViewAdminHome.theStage, ViewAdminHome.theUser);
 	}
 	
 	/**********
@@ -184,6 +184,8 @@ public class ControllerAdminHome {
 		}
 		return false;
 	}
+	
+	
 	
 	/**********
 	 * <p> 
