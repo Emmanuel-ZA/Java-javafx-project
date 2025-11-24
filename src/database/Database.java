@@ -130,86 +130,101 @@ public class Database {
 	}
 	
 	private void createPostTables() throws SQLException {  
-		// Create the Post table to hold discussion posts
-		String postTable = "CREATE TABLE IF NOT EXISTS Post ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "author VARCHAR(255) NOT NULL, "
-				+ "content VARCHAR(500) NOT NULL)";
-		statement.execute(postTable);
+	    String postTable = "CREATE TABLE IF NOT EXISTS Post ("
+	            + "id INT AUTO_INCREMENT PRIMARY KEY, "
+	            + "author VARCHAR(255) NOT NULL, "
+	            + "content VARCHAR(500) NOT NULL, "
+	            + "authorRole VARCHAR(10))"; 
+	    statement.execute(postTable);
 	}
 	
 	private void createRepliesTables() throws SQLException {  
-		// Create the Reply table to hold replies to posts
-		String replyTable = "CREATE TABLE IF NOT EXISTS Reply ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "postID INT NOT NULL, "
-				+ "author VARCHAR(255) NOT NULL, "
-				+ "content VARCHAR(500) NOT NULL, "
-				+ "FOREIGN KEY (postID) REFERENCES Post(id))";
-		statement.execute(replyTable);
+	    String replyTable = "CREATE TABLE IF NOT EXISTS Reply ("
+	            + "id INT AUTO_INCREMENT PRIMARY KEY, "
+	            + "postID INT NOT NULL, "
+	            + "author VARCHAR(255) NOT NULL, "
+	            + "content VARCHAR(500) NOT NULL, "
+	            + "authorRole VARCHAR(10), " 
+	            + "FOREIGN KEY (postID) REFERENCES Post(id))";
+	    statement.execute(replyTable);
 	}
 
-	// ========== CRUD OPERATIONS ==========
-
-	/*******
-	 * <p> Method: createPost(String author, String content) </p>
-	 * 
-	 * <p> Description: Inserts a new post into the posts table and returns the auto-generated postID.
-	 * This is the CREATE operation of CRUD. </p>
-	 * 
-	 * @param author specifies the username of the post author
-	 * @param content specifies the post content/body text
-	 * 
-	 * @return the auto-generated postID from the database, or -1 if insertion failed
-	 * 
-	 * @throws SQLException when there is an issue executing the SQL command
-	 */
-	// ========== CRUD OPERATIONS ==========
-
-	/*******
-	 * <p> Method: createPost(String author, String content) </p>
-	 */
-	public int createPost(String author, String content) throws SQLException {
-	    String insertPost = "INSERT INTO Post (author, content) VALUES (?, ?)";
+	
+	 // Method: createPost(String author, String content) </p>
+	
+	public int createPost(String author, String content, String authorRole) throws SQLException {
+	    // SQL statement with ? placeholders for parameters (prevents SQL injection)
+	    String insertPost = "INSERT INTO Post (author, content, authorRole) VALUES (?, ?, ?)";
+	    
+	    // try-with-resources ensures the PreparedStatement is automatically closed when done
+	    // Statement.RETURN_GENERATED_KEYS tells database to give us back the auto-generated ID
 	    try (PreparedStatement pstmt = connection.prepareStatement(insertPost, 
 	            Statement.RETURN_GENERATED_KEYS)) {
+	        
+	        // Set the first ? to the author parameter (index starts at 1, not 0)
 	        pstmt.setString(1, author);
+	        
+	        // Set the second ? to the content parameter
 	        pstmt.setString(2, content);
 	        
+	        // Set the third ? to the authorRole parameter
+	        pstmt.setString(3, authorRole);
+	        
+	        // Execute the INSERT statement and get back the number of rows affected
 	        int rowsInserted = pstmt.executeUpdate();
+	        
+	        // If at least one row was inserted successfully
 	        if (rowsInserted > 0) {
+	            // Get the auto-generated keys (in this case, the post ID)
 	            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+	            
+	            // If there is a generated key available
 	            if (generatedKeys.next()) {
+	                // Return the generated post ID (column 1 is the first/only key)
 	                return generatedKeys.getInt(1);
 	            }
 	        }
 	    } catch (SQLException e) {
+	        // If anything goes wrong, print the error details
 	        e.printStackTrace();
 	    }
+	    
+	    // If we get here, something went wrong - return -1 to indicate failure
 	    return -1;
 	}
 
-	/*******
-	 * <p> Method: getPost(int postID) </p>
-	 * 
-	 * @return a Post object if found, null if not found
-	 */
+	
+	// return a Post object if found, null if not found
+	 
 	public Post getPost(int postID) throws SQLException {
+	    // SQL query to select all columns from Post table where id matches
 	    String query = "SELECT * FROM Post WHERE id = ?";
+	    
+	    // try-with-resources automatically closes PreparedStatement when done
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        
+	        // Set the ? placeholder to the postID we're looking for
 	        pstmt.setInt(1, postID);
+	        
+	        // Execute the query and get back a ResultSet (contains the matching rows)
 	        ResultSet rs = pstmt.executeQuery();
 	        
+	        // Check if we found a matching row (next() returns true if row exists)
 	        if (rs.next()) {
+	            // Create and return a new Post object with data from the database
 	            return new Post(
-	                rs.getInt("id"),
-	                rs.getString("author"),
-	                rs.getString("content")
+	                rs.getInt("id"),              // Get the id column as an integer
+	                rs.getString("author"),       // Get the author column as a String
+	                rs.getString("content"),      // Get the content column as a String
+	                rs.getString("authorRole")    // Get the authorRole column as a String
 	            );
 	        }
 	    } catch (SQLException e) {
+	        // Print error details if something goes wrong
 	        e.printStackTrace();
 	    }
+	    
+	    // If we get here, no post was found or there was an error - return null
 	    return null;
 	}
 
@@ -219,88 +234,71 @@ public class Database {
 	 * @return a List of Post objects for all posts
 	 */
 	public List<Post> getAllPosts() throws SQLException {
+	    // Create a new empty ArrayList to store all the Post objects we'll find
 	    List<Post> posts = new ArrayList<>();
+	    
+	    // SQL query to select ALL rows and columns from the Post table
+	    // No WHERE clause means we get everything
 	    String query = "SELECT * FROM Post";
+	    
+	    // try-with-resources ensures PreparedStatement is closed automatically
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        
+	        // Execute the query and get back all matching rows
 	        ResultSet rs = pstmt.executeQuery();
 	        
+	        // Loop through each row in the ResultSet
+	        // next() moves to the next row and returns false when no more rows exist
 	        while (rs.next()) {
+	            // Create a new Post object from the current row's data
 	            Post post = new Post(
-	                rs.getInt("id"),
-	                rs.getString("author"),
-	                rs.getString("content")
+	                rs.getInt("id"),              // Extract id column
+	                rs.getString("author"),       // Extract author column
+	                rs.getString("content"),      // Extract content column
+	                rs.getString("authorRole")    // Extract authorRole column
 	            );
+	            
+	            // Add this Post object to our list
 	            posts.add(post);
 	        }
 	    } catch (SQLException e) {
+	        // If anything goes wrong, print the error
 	        e.printStackTrace();
 	    }
+	    
+	    // Return the list of all posts (could be empty if no posts exist)
 	    return posts;
 	}
 
-	/*******
-	 * <p> Method: getPostsByAuthor(String author) </p>
-	 */
-	public List<Post> getPostsByAuthor(String author) throws SQLException {
-	    List<Post> posts = new ArrayList<>();
-	    String query = "SELECT * FROM Post WHERE author = ?";
-	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	        pstmt.setString(1, author);
-	        ResultSet rs = pstmt.executeQuery();
-	        
-	        while (rs.next()) {
-	            Post post = new Post(
-	                rs.getInt("id"),
-	                rs.getString("author"),
-	                rs.getString("content")
-	            );
-	            posts.add(post);
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return posts;
-	}
+	
 
-	/*******
-	 * <p> Method: searchPosts(String keyword) </p>
-	 */
-	public List<Post> searchPosts(String keyword) throws SQLException {
-	    List<Post> posts = new ArrayList<>();
-	    String query = "SELECT * FROM Post WHERE UPPER(content) LIKE UPPER(?)";
-	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	        String searchPattern = "%" + keyword + "%";
-	        pstmt.setString(1, searchPattern);
-	        ResultSet rs = pstmt.executeQuery();
-	        
-	        while (rs.next()) {
-	            Post post = new Post(
-	                rs.getInt("id"),
-	                rs.getString("author"),
-	                rs.getString("content")
-	            );
-	            posts.add(post);
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return posts;
-	}
-
+	
 	/*******
 	 * <p> Method: updatePost(int postID, String content) </p>
 	 */
 	public boolean updatePost(int postID, String content) throws SQLException {
+	    // SQL UPDATE statement - sets content field to new value for specific post
 	    String updatePost = "UPDATE Post SET content = ? WHERE id = ?";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(updatePost)) {
+	        // Set first ? to the new content
 	        pstmt.setString(1, content);
+	        
+	        // Set second ? to the ID of the post we're updating
 	        pstmt.setInt(2, postID);
 	        
+	        // Execute the update and get number of rows affected
 	        int rowsUpdated = pstmt.executeUpdate();
+	        
+	        // If at least one row was updated, return true (success)
+	        // If rowsUpdated is 0, the post ID probably doesn't exist
 	        return rowsUpdated > 0;
 	    } catch (SQLException e) {
+	        // Print error and fall through to return false
 	        e.printStackTrace();
 	    }
+	    
+	    // If we get here, update failed - return false
 	    return false;
 	}
 
@@ -309,22 +307,38 @@ public class Database {
 	 */
 	public boolean deletePost(int postID) throws SQLException {
 	    try {
-	        // First delete all replies associated with this post
+	        // STEP 1: Delete all replies associated with this post
+	        // This must happen first due to foreign key constraints
 	        String deleteReplies = "DELETE FROM Reply WHERE postID = ?";
+	        
 	        try (PreparedStatement pstmt = connection.prepareStatement(deleteReplies)) {
+	            // Set the ? to the post ID whose replies we want to delete
 	            pstmt.setInt(1, postID);
+	            
+	            // Execute the delete - we don't care how many replies were deleted
 	            pstmt.executeUpdate();
 	        }
-	        // Then delete the post itself
+	        
+	        // STEP 2: Now delete the post itself
+	        // This is safe now because all its replies are gone
 	        String deletePost = "DELETE FROM Post WHERE id = ?";
+	        
 	        try (PreparedStatement pstmt = connection.prepareStatement(deletePost)) {
+	            // Set the ? to the post ID we want to delete
 	            pstmt.setInt(1, postID);
+	            
+	            // Execute delete and get number of rows deleted
 	            int rowsDeleted = pstmt.executeUpdate();
+	            
+	            // If at least one row (the post) was deleted, return true
 	            return rowsDeleted > 0;
 	        }
 	    } catch (SQLException e) {
+	        // If anything goes wrong, print error and return false
 	        e.printStackTrace();
 	    }
+	    
+	    // If we get here, deletion failed
 	    return false;
 	}
 
@@ -333,24 +347,46 @@ public class Database {
 	/*******
 	 * <p> Method: createReply(int postID, String author, String content) </p>
 	 */
-	public int createReply(int postID, String author, String content) throws SQLException {
-	    String insertReply = "INSERT INTO Reply (postID, author, content) VALUES (?, ?, ?)";
+	
+	public int createReply(int postID, String author, String content, String authorRole) throws SQLException {
+	    // SQL INSERT with 4 parameters - note we're adding authorRole
+	    String insertReply = "INSERT INTO Reply (postID, author, content, authorRole) VALUES (?, ?, ?, ?)";
+	    
+	    // Request generated keys so we can return the new reply's ID
 	    try (PreparedStatement pstmt = connection.prepareStatement(insertReply,
 	            Statement.RETURN_GENERATED_KEYS)) {
+	        
+	        // Set parameter 1: which post this reply belongs to
 	        pstmt.setInt(1, postID);
+	        
+	        // Set parameter 2: who is creating this reply
 	        pstmt.setString(2, author);
+	        
+	        // Set parameter 3: the text content of the reply
 	        pstmt.setString(3, content);
 	        
+	        // Set parameter 4: the role of the author
+	        pstmt.setString(4, authorRole);
+	        
+	        // Execute the INSERT
 	        int rowsInserted = pstmt.executeUpdate();
+	        
+	        // If insert succeeded
 	        if (rowsInserted > 0) {
+	            // Get the auto-generated reply ID
 	            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+	            
+	            // If we got a generated key back
 	            if (generatedKeys.next()) {
+	                // Return the new reply's ID
 	                return generatedKeys.getInt(1);
 	            }
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    
+	    // If we get here, creation failed
 	    return -1;
 	}
 
@@ -360,22 +396,32 @@ public class Database {
 	 * @return a Reply object if found, null if not found
 	 */
 	public Reply getReply(int replyID) throws SQLException {
+	    // SQL query to get all columns for a specific reply
 	    String query = "SELECT * FROM Reply WHERE id = ?";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        // Set the reply ID we're looking for
 	        pstmt.setInt(1, replyID);
+	        
+	        // Execute query
 	        ResultSet rs = pstmt.executeQuery();
 	        
+	        // If we found the reply
 	        if (rs.next()) {
+	            // Create and return a Reply object with all the data including role
 	            return new Reply(
-	                rs.getInt("id"),
-	                rs.getInt("postID"),
-	                rs.getString("author"),
-	                rs.getString("content")
+	                rs.getInt("id"),              // Reply's unique ID
+	                rs.getInt("postID"),          // ID of post this reply belongs to
+	                rs.getString("author"),       // Username of reply author
+	                rs.getString("content"),      // Reply text
+	                rs.getString("authorRole")    // Role of author
 	            );
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    
+	    // Reply not found or error occurred
 	    return null;
 	}
 
@@ -385,26 +431,41 @@ public class Database {
 	 * @return a List of Reply objects for the post
 	 */
 	public List<Reply> getRepliesByPost(int postID) throws SQLException {
+	    // Create empty list for replies
 	    List<Reply> replies = new ArrayList<>();
+	    
+	    // SQL query with WHERE clause to filter by post ID
 	    String query = "SELECT * FROM Reply WHERE postID = ?";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        // Set which post's replies we want
 	        pstmt.setInt(1, postID);
+	        
+	        // Execute query
 	        ResultSet rs = pstmt.executeQuery();
 	        
+	        // Loop through all replies for this post
 	        while (rs.next()) {
+	            // Create Reply object from database row
 	            Reply reply = new Reply(
 	                rs.getInt("id"),
 	                rs.getInt("postID"),
 	                rs.getString("author"),
-	                rs.getString("content")
+	                rs.getString("content"),
+	                rs.getString("authorRole")
 	            );
+	            
+	            // Add to list
 	            replies.add(reply);
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    
+	    // Return all replies for this post (empty list if post has no replies)
 	    return replies;
 	}
+
 
 	/*******
 	 * <p> Method: getAllReplies() </p>
@@ -412,65 +473,65 @@ public class Database {
 	 * @return a List of Reply objects for all replies
 	 */
 	public List<Reply> getAllReplies() throws SQLException {
+		// Create empty list to store all replies
 	    List<Reply> replies = new ArrayList<>();
+	    
+	    // SQL query to get ALL replies - no WHERE clause means get everything
 	    String query = "SELECT * FROM Reply";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        // Execute the query - no parameters to set since we want all replies
 	        ResultSet rs = pstmt.executeQuery();
 	        
+	        // Loop through every reply in the database
 	        while (rs.next()) {
+	            // Create a Reply object from the current row's data
 	            Reply reply = new Reply(
-	                rs.getInt("id"),
-	                rs.getInt("postID"),
-	                rs.getString("author"),
-	                rs.getString("content")
+	                rs.getInt("id"),              // Reply's unique ID
+	                rs.getInt("postID"),          // Which post this reply belongs to
+	                rs.getString("author"),       // Username of reply creator
+	                rs.getString("content"),      // Reply text content
+	                rs.getString("authorRole")    // Role of author when reply was created
 	            );
+	            
+	            // Add this reply to our list
 	            replies.add(reply);
 	        }
 	    } catch (SQLException e) {
+	        // Print any errors that occur
 	        e.printStackTrace();
 	    }
+	    
+	    // Return the complete list of all replies
 	    return replies;
 	}
 
-	/*******
-	 * <p> Method: getRepliesByAuthor(String author) </p>
-	 */
-	public List<Reply> getRepliesByAuthor(String author) throws SQLException {
-	    List<Reply> replies = new ArrayList<>();
-	    String query = "SELECT * FROM Reply WHERE author = ?";
-	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	        pstmt.setString(1, author);
-	        ResultSet rs = pstmt.executeQuery();
-	        
-	        while (rs.next()) {
-	            Reply reply = new Reply(
-	                rs.getInt("id"),
-	                rs.getInt("postID"),
-	                rs.getString("author"),
-	                rs.getString("content")
-	            );
-	            replies.add(reply);
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return replies;
-	}
 
 	/*******
 	 * <p> Method: updateReply(int replyID, String content) </p>
 	 */
 	public boolean updateReply(int replyID, String content) throws SQLException {
+	    // SQL UPDATE statement - changes content for a specific reply
 	    String updateReply = "UPDATE Reply SET content = ? WHERE id = ?";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(updateReply)) {
+	        // Set first ? to the new content text
 	        pstmt.setString(1, content);
+	        
+	        // Set second ? to the ID of the reply we're updating
 	        pstmt.setInt(2, replyID);
 	        
+	        // Execute the update and get number of rows affected
 	        int rowsUpdated = pstmt.executeUpdate();
+	        
+	        // Return true if at least one row was updated
+	        // If 0 rows updated, the reply ID probably doesn't exist
 	        return rowsUpdated > 0;
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    
+	    // Update failed
 	    return false;
 	}
 
@@ -478,14 +539,23 @@ public class Database {
 	 * <p> Method: deleteReply(int replyID) </p>
 	 */
 	public boolean deleteReply(int replyID) throws SQLException {
+	    // SQL DELETE statement - removes one reply by ID
 	    String deleteReply = "DELETE FROM Reply WHERE id = ?";
+	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(deleteReply)) {
+	        // Set the ? to the ID of reply we want to delete
 	        pstmt.setInt(1, replyID);
+	        
+	        // Execute the delete and get number of rows deleted
 	        int rowsDeleted = pstmt.executeUpdate();
+	        
+	        // Return true if at least one row (the reply) was deleted
 	        return rowsDeleted > 0;
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    
+	    // Deletion failed
 	    return false;
 	}
 
@@ -545,9 +615,13 @@ public class Database {
  * 
  */
 	public void register(User user) throws SQLException {
-		String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
-				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		 if (user.getUserName() == null || user.getUserName().trim().isEmpty()) {
+		        throw new SQLException("Username cannot be empty");
+		    }
+	
+		    String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
+		            + "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2) "
+		            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			currentUsername = user.getUserName();
 			pstmt.setString(1, currentUsername);
@@ -1081,7 +1155,7 @@ public class Database {
 	        ResultSet rs = pstmt.executeQuery();
 	        
 	        if (rs.next()) {
-	            return rs.getString("firstName"); // Return the preferred first name if user exists
+	            return rs.getString("preferredFirstName"); // Return the preferred first name if user exists
 	        }
 			
 	    } catch (SQLException e) {
@@ -1181,24 +1255,30 @@ public class Database {
 	 */
 	// get the attributes for a specified user
 	public boolean getUserAccountDetails(String username) {
-		String query = "SELECT * FROM userDB WHERE username = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-			pstmt.setString(1, username);
-	        ResultSet rs = pstmt.executeQuery();			
-			rs.next();
-	    	currentUsername = rs.getString(2);
-	    	currentPassword = rs.getString(3);
-	    	currentFirstName = rs.getString(4);
-	    	currentMiddleName = rs.getString(5);
-	    	currentLastName = rs.getString(6);
-	    	currentPreferredFirstName = rs.getString(7);
-	    	currentEmailAddress = rs.getString(8);
-	    	currentAdminRole = rs.getBoolean(9);
-	    	currentNewRole1 = rs.getBoolean(10);
-	    	currentNewRole2 = rs.getBoolean(11);
-			return true;
+	    String query = "SELECT * FROM userDB WHERE username = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        ResultSet rs = pstmt.executeQuery();
+	        
+	        // Check if user exists
+	        if (!rs.next()) {
+	            return false;  // User not found
+	        }
+	        
+	        currentUsername = rs.getString(2);
+	        currentPassword = rs.getString(3);
+	        currentFirstName = rs.getString(4);
+	        currentMiddleName = rs.getString(5);
+	        currentLastName = rs.getString(6);
+	        currentPreferredFirstName = rs.getString(7);
+	        currentEmailAddress = rs.getString(8);
+	        currentAdminRole = rs.getBoolean(9);
+	        currentNewRole1 = rs.getBoolean(10);
+	        currentNewRole2 = rs.getBoolean(11);
+	        return true;
 	    } catch (SQLException e) {
-			return false;
+	        e.printStackTrace();  // Add this for debugging
+	        return false;
 	    }
 	}
 	
@@ -1402,6 +1482,20 @@ public class Database {
 		System.out.println();
 		}
 		resultSet.close();
+	}
+	
+	/**
+	 * Method to clear all data from all tables for testing
+	 */
+	public void clearAllTables() throws SQLException {
+	    try {
+	        statement.execute("DELETE FROM Reply");
+	        statement.execute("DELETE FROM Post");
+	        statement.execute("DELETE FROM userDB");
+	        statement.execute("DELETE FROM InvitationCodes");
+	    } catch (SQLException e) {
+	        // Ignore errors if tables don't exist yet
+	    }
 	}
 
 

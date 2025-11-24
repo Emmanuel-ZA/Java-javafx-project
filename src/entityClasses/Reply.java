@@ -5,12 +5,14 @@ public class Reply {
     private int postID;
     private String author;
     private String content;
+    private String authorRole;
 
-    public Reply(int id, int postID, String author, String content) {
+    public Reply(int id, int postID, String author, String content, String authorRole) {
         this.id = id;
         this.postID = postID;
         this.author = author;
         this.content = content;
+        this.authorRole = authorRole;
     }
 
     public int getReplyID() {  
@@ -28,7 +30,12 @@ public class Reply {
     public String getContent() {
         return content;
     }
-
+    
+    public String getAuthorRole() {
+        return authorRole;
+    }
+    
+    // Setters
     public void setReplyId(int id) {
         this.id = id;
     }
