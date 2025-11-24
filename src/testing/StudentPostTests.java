@@ -85,7 +85,7 @@ public class StudentPostTests {
      * </ol>
      * 
      * <p><strong>Expected Result:</strong> Post shows [Admin] badge</p>
-     * <p><strong>Result:</strong> ✓ PASS</p>
+     * <p><strong>Result:</strong> ✓ PASS</p>cd
      * 
      * @see Screenshot "Test2-CreatePost-Admin.png"
      */

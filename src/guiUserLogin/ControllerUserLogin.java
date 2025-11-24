@@ -3,6 +3,7 @@ package guiUserLogin;
 import database.Database;
 import entityClasses.User;
 import javafx.stage.Stage;
+import validators.SQLInjectionDetector;
 
 public class ControllerUserLogin {
 	
@@ -13,7 +14,7 @@ public class ControllerUserLogin {
 	This controller is not a class that gets instantiated.  Rather, it is a collection of protected
 	static methods that can be called by the View (which is a singleton instantiated object) and 
 	the Model is often just a stub, or will be a singleton instantiated object.
-	
+
 	*/
 
 
@@ -32,12 +33,35 @@ public class ControllerUserLogin {
 	 * The method reaches batch to the view page and to fetch the information needed rather than
 	 * passing that information as parameters.
 	 * 
+	 * SECURITY UPDATE: Added SQL Injection detection before database queries.
+	 * 
 	 */	
 	protected static void doLogin(Stage ts) {
 		theStage = ts;
 		String username = ViewUserLogin.text_Username.getText();
 		String password = ViewUserLogin.text_Password.getText();
     	boolean loginResult = false;
+    	
+    	// ========== NEW: Check for SQL Injection in Username ==========
+    	String usernameError = SQLInjectionDetector.detectSQLInjection(username);
+    	if (!usernameError.isEmpty()) {
+    		// Display red error message in GUI
+    		ViewUserLogin.label_SQLInjectionError.setText(usernameError);
+    		System.out.println("SQL Injection Attempt Detected (Username): " + username);
+    		return;
+    	}
+    	
+    	// ========== NEW: Check for SQL Injection in Password ==========
+    	String passwordError = SQLInjectionDetector.detectSQLInjection(password);
+    	if (!passwordError.isEmpty()) {
+    		// Display red error message in GUI
+    		ViewUserLogin.label_SQLInjectionError.setText(passwordError);
+    		System.out.println("SQL Injection Attempt Detected (Password): " + password);
+    		return;
+    	}
+    	
+    	// ========== NEW: Clear error label if no injection detected ==========
+    	ViewUserLogin.label_SQLInjectionError.setText("");
     	
 		// Fetch the user and verify the username
      	if (theDatabase.getUserAccountDetails(username) == false) {

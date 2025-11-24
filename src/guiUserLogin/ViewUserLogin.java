@@ -46,7 +46,7 @@ public class ViewUserLogin {
 	private static Label label_LogInInsrtuctions = new Label("Enter your user name and password and "+	
 			"then click on the LogIn button");
 	protected static Alert alertUsernamePasswordError = new Alert(AlertType.INFORMATION);
-
+	protected static Label label_SQLInjectionError = new Label();
 
 	//	private User user;
 	protected static TextField text_Username = new TextField();
@@ -122,6 +122,11 @@ public class ViewUserLogin {
 		theRootPane = new Pane();
 		theUserLoginScene = new Scene(theRootPane, width, height);
 		
+		label_SQLInjectionError.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 14;");
+		label_SQLInjectionError.setMinWidth(width);
+		label_SQLInjectionError.setLayoutX(20);
+		label_SQLInjectionError.setLayoutY(90);
+		
 		// Populate the window with the title and other common widgets and set their static state
 		setupLabelUI(label_ApplicationTitle, "Arial", 32, width, Pos.CENTER, 0, 10);
 
@@ -170,11 +175,12 @@ public class ViewUserLogin {
 		//		theRootPane.getChildren().clear();
 
 		theRootPane.getChildren().addAll(
-				label_ApplicationTitle, 
-				label_OperationalStartTitle,
-				label_LogInInsrtuctions, label_AccountSetupInsrtuctions, text_Username,
-				button_Login, text_Password, text_Invitation, button_SetupAccount,
-				button_Quit);
+			    label_ApplicationTitle, 
+			    label_OperationalStartTitle,
+			    label_SQLInjectionError,  
+			    label_LogInInsrtuctions, label_AccountSetupInsrtuctions, text_Username,
+			    button_Login, text_Password, text_Invitation, button_SetupAccount,
+			    button_Quit);
 	}
 
 
