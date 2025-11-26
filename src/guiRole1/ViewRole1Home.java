@@ -57,6 +57,7 @@ public class ViewRole1Home {
 	// GUI Area 2: This is a stub, so there are no widgets here.  For an actual role page, this are
 	// would contain the widgets needed for the user to play the assigned role.
 	
+	protected static Label label_ReplyAlert = new Label();
 	protected static Label label_Post = new Label();
 	protected static TextArea text_Post = new TextArea();
 	protected static Button button_ViewPost = new Button("View Posts");
@@ -116,6 +117,7 @@ public class ViewRole1Home {
 	 */
 	public static void displayRole1Home(Stage ps, User user) {
 		
+		ControllerRole1Home.updateReplyAlert();
 		// Establish the references to the GUI and the current user
 		theStage = ps;
 		theUser = user;
@@ -151,6 +153,11 @@ public class ViewRole1Home {
 	 * 
 	 */
 	private ViewRole1Home() {
+		
+		
+		setupLabelUI(label_ReplyAlert, "Arial", 16, width-40, Pos.CENTER, 20, 230);
+		label_ReplyAlert.setStyle("-fx-text-fill: #1E88E5; -fx-font-weight: bold;");
+		label_ReplyAlert.setVisible(false); 
 
 		// Create the Pane for the list of widgets and the Scene for the window
 		theRootPane = new Pane();
@@ -190,9 +197,10 @@ public class ViewRole1Home {
 		// This is the end of the GUI initialization code
 		
 		// Place all of the widget items into the Root Pane's list of children
-         theRootPane.getChildren().addAll(
-			label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
-	        line_Separator4, button_Logout, button_Quit, button_ViewPost);
+        theRootPane.getChildren().addAll(
+        	    label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
+        	    line_Separator4, button_Logout, button_Quit, button_ViewPost, 
+        	    label_ReplyAlert);  
 }
 
 	/*-********************************************************************************************

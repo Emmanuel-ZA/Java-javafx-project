@@ -136,7 +136,10 @@ public class Database {
 	            + "content VARCHAR(500) NOT NULL, "
 	            + "authorRole VARCHAR(10), "
 	            + "isPinned BOOLEAN DEFAULT FALSE, "
-	            + "pinnedBy VARCHAR(255))";
+	            + "pinnedBy VARCHAR(255))"
+	    		+ "hasUnreadReplies BOOLEAN DEFAULT FALSE, "
+	    		+ "lastReplyTimestamp TIMESTAMP)";
+	    
 	    statement.execute(postTable);
 	}
 	
@@ -351,45 +354,95 @@ public class Database {
 	 */
 	
 	public int createReply(int postID, String author, String content, String authorRole) throws SQLException {
-	    // SQL INSERT with 4 parameters - note we're adding authorRole
 	    String insertReply = "INSERT INTO Reply (postID, author, content, authorRole) VALUES (?, ?, ?, ?)";
 	    
-	    // Request generated keys so we can return the new reply's ID
 	    try (PreparedStatement pstmt = connection.prepareStatement(insertReply,
 	            Statement.RETURN_GENERATED_KEYS)) {
 	        
-	        // Set parameter 1: which post this reply belongs to
 	        pstmt.setInt(1, postID);
-	        
-	        // Set parameter 2: who is creating this reply
 	        pstmt.setString(2, author);
-	        
-	        // Set parameter 3: the text content of the reply
 	        pstmt.setString(3, content);
-	        
-	        // Set parameter 4: the role of the author
 	        pstmt.setString(4, authorRole);
 	        
-	        // Execute the INSERT
 	        int rowsInserted = pstmt.executeUpdate();
 	        
-	        // If insert succeeded
 	        if (rowsInserted > 0) {
-	            // Get the auto-generated reply ID
 	            ResultSet generatedKeys = pstmt.getGeneratedKeys();
 	            
-	            // If we got a generated key back
 	            if (generatedKeys.next()) {
-	                // Return the new reply's ID
-	                return generatedKeys.getInt(1);
+	                int replyId = generatedKeys.getInt(1);
+	                
+	                // NEW: Mark the parent post as having unread replies
+	                markPostAsHavingNewReply(postID);
+	                
+	                return replyId;
 	            }
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
 	    
-	    // If we get here, creation failed
 	    return -1;
+	}
+	
+	/**
+	 * Marks a post as having new unread replies.
+	 * Called automatically when a reply is created.
+	 * 
+	 * @param postID the ID of the post that received a new reply
+	 * @throws SQLException if database update fails
+	 */
+	private void markPostAsHavingNewReply(int postID) throws SQLException {
+	    String updatePost = "UPDATE Post SET hasUnreadReplies = TRUE, lastReplyTimestamp = CURRENT_TIMESTAMP WHERE id = ?";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(updatePost)) {
+	        pstmt.setInt(1, postID);
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	/**
+	 * Gets the count of posts authored by a specific user that have unread replies.
+	 * 
+	 * @param username the username of the post author
+	 * @return the number of posts with unread replies
+	 * @throws SQLException if database query fails
+	 */
+	public int getUnreadReplyCount(String username) throws SQLException {
+	    String query = "SELECT COUNT(*) FROM Post WHERE author = ? AND hasUnreadReplies = TRUE";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        ResultSet rs = pstmt.executeQuery();
+	        
+	        if (rs.next()) {
+	            return rs.getInt(1);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return 0;
+	}
+	
+	/**
+	 * Marks all replies for a specific post as read by clearing the unread flag.
+	 * Called when the post author views the replies.
+	 * 
+	 * @param postID the ID of the post whose replies are being viewed
+	 * @throws SQLException if database update fails
+	 */
+	public void markRepliesAsRead(int postID) throws SQLException {
+	    String updatePost = "UPDATE Post SET hasUnreadReplies = FALSE WHERE id = ?";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(updatePost)) {
+	        pstmt.setInt(1, postID);
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 	}
 
 	/*******

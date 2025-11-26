@@ -15,6 +15,26 @@ public class ControllerRole2Home {
 	    
 	}
 	
+	protected static void updateReplyAlert() {
+	    try {
+	        String username = ViewRole2Home.theUser.getUserName();
+	        int unreadCount = applicationMain.FoundationsMain.database.getUnreadReplyCount(username);
+	        
+	        if (unreadCount > 0) {
+	            String message = (unreadCount == 1) 
+	                ? "🔔 You have 1 new reply to your post" 
+	                : "🔔 You have " + unreadCount + " new replies to your posts";
+	            
+	            ViewRole2Home.label_ReplyAlert.setText(message);
+	            ViewRole2Home.label_ReplyAlert.setVisible(true);
+	        } else {
+	            ViewRole2Home.label_ReplyAlert.setVisible(false);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
 	protected static void performLogout() {
 		guiUserLogin.ViewUserLogin.displayUserLogin(ViewRole2Home.theStage);
 	}

@@ -363,6 +363,11 @@ public class Post {
     private boolean isPinned;
     private String pinnedBy;
     
+    private boolean hasUnreadReplies;
+    
+    private java.sql.Timestamp lastReplyTimestamp;
+
+    
     // ==================== CONSTRUCTOR ====================
     
     /**
@@ -424,14 +429,18 @@ public class Post {
      * @see database.Database#getAllPosts()
      * @see database.Database#getPostsByAuthor(String)
      */
-    public Post(int id, String author, String content, String authorRole, boolean isPinned, String pinnedBy) {
-        this.id = id;
-        this.author = author;
-        this.content = content;
-        this.authorRole = authorRole;
-        this.isPinned = isPinned;
-        this.pinnedBy = pinnedBy;
-    }
+    public Post(int id, String author, String content, String authorRole, 
+            boolean isPinned, String pinnedBy, 
+            boolean hasUnreadReplies, java.sql.Timestamp lastReplyTimestamp) {
+    this.id = id;
+    this.author = author;
+    this.content = content;
+    this.authorRole = authorRole;
+    this.isPinned = isPinned;
+    this.pinnedBy = pinnedBy;
+    this.hasUnreadReplies = hasUnreadReplies;
+    this.lastReplyTimestamp = lastReplyTimestamp;
+}
     
     // ==================== GETTERS ====================
     
@@ -654,6 +663,9 @@ public class Post {
         return this.authorRole;
     }
     
+    public java.sql.Timestamp getLastReplyTimestamp() {
+        return this.lastReplyTimestamp;
+    }
     
     
     // ==================== SETTERS ====================
@@ -702,6 +714,10 @@ public class Post {
      */
     public void setPostId(int id) {
         this.id = id;
+    }
+    
+    public void setLastReplyTimestamp(java.sql.Timestamp lastReplyTimestamp) {
+        this.lastReplyTimestamp = lastReplyTimestamp;
     }
     
     /**
@@ -896,6 +912,14 @@ public class Post {
 
     public void setPinnedBy(String pinnedBy) {
         this.pinnedBy = pinnedBy;
+    }
+    
+    public boolean hasUnreadReplies() {
+        return this.hasUnreadReplies;
+    }
+    
+    public void setHasUnreadReplies(boolean hasUnreadReplies) {
+        this.hasUnreadReplies = hasUnreadReplies;
     }
     
     // ==================== UTILITY METHODS ====================

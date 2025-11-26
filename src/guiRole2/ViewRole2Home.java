@@ -56,6 +56,7 @@ public class ViewRole2Home {
 	// GUI ARea 2: This is a stub, so there are no widgets here.  For an actual role page, this are
 	// would contain the widgets needed for the user to play the assigned role.
 	
+	protected static Label label_ReplyAlert = new Label();
 	protected static Label label_Post = new Label();	
 	protected static TextArea text_Post = new TextArea();
 	protected static Button button_ViewPost = new Button("View Posts"); // view posts option
@@ -113,6 +114,8 @@ public class ViewRole2Home {
 	 */
 	public static void displayRole2Home(Stage ps, User user) {
 		
+		ControllerRole2Home.updateReplyAlert();
+
 		// Establish the references to the GUI and the current user
 		theStage = ps;
 		theUser = user;
@@ -155,6 +158,10 @@ public class ViewRole2Home {
 		// Populate the window with the title and other common widgets and set their static state
 		
 		// GUI Area 1
+
+		setupLabelUI(label_ReplyAlert, "Arial", 16, width-40, Pos.CENTER, 20, 230);
+		label_ReplyAlert.setStyle("-fx-text-fill: #1E88E5; -fx-font-weight: bold;");
+		label_ReplyAlert.setVisible(false);
 		label_PageTitle.setText("Role2 Home Page");
 		setupLabelUI(label_PageTitle, "Arial", 28, width, Pos.CENTER, 0, 5);
 
@@ -180,8 +187,9 @@ public class ViewRole2Home {
 		
 		// Place all of the widget items into the Root Pane's list of children
         theRootPane.getChildren().addAll(
-			label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
-	        line_Separator4, button_Logout, button_Quit, button_ViewPost);
+        	    label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
+        	    line_Separator4, button_Logout, button_Quit, button_ViewPost,
+        	    label_ReplyAlert); 
 	}
 	
 	

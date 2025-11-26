@@ -552,11 +552,12 @@ public class ControllerPosts {
         int id = ModelPosts.getID(p);
         
         try {
-            // US-05: Get and display the original post for context
             Post post = ViewPosts.theDatabase.getPost(id);
             ViewPosts.text_PostInReply.setText(post.getContent());
            
-            // Get all replies for this post
+            // US-3.1: Mark replies as read when viewing
+            ViewPosts.theDatabase.markRepliesAsRead(id);
+            
             List<Reply> postReplies = ViewPosts.theDatabase.getRepliesByPost(id);
             
             // Clear existing replies from ListView
