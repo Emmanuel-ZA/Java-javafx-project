@@ -555,24 +555,19 @@ public class ControllerPosts {
             Post post = ViewPosts.theDatabase.getPost(id);
             ViewPosts.text_PostInReply.setText(post.getContent());
            
-            // US-3.1: Mark replies as read when viewing
+            // Mark replies as read when viewing them
             ViewPosts.theDatabase.markRepliesAsRead(id);
             
             List<Reply> postReplies = ViewPosts.theDatabase.getRepliesByPost(id);
             
-            // Clear existing replies from ListView
             ViewPosts.list_Replies.getItems().clear();
             
-            // Format and display each reply with role badge
             for (Reply reply : postReplies) {
                 String displayText = ModelPosts.formatReplyForDisplay(reply);
                 ViewPosts.list_Replies.getItems().add(displayText);
             }
             
-            // Store current post ID for reply creation
             ViewPosts.currentPostID = id;
-            
-            // Show replies panel
             ViewPosts.showRepliesPanel();
             
         } catch (SQLException e) {

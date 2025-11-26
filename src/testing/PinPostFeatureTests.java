@@ -155,7 +155,7 @@ class PinPostFeatureTests {
         assertTrue(formattedPinned.startsWith("📌"), "Pinned post should start with pin icon");
         assertTrue(formattedPinned.contains("id: " + postId), "Post ID should be in formatted string");
 
-        Post unpinnedPost = new Post(postId, "student", "content", "Role1", false, null);
+        Post unpinnedPost = new Post(postId, "student", "content", "Role1", false, null, false, null);
         String formatUnpinned = (unpinnedPost.isPinned() ? "📌 " : "") + "id: " + unpinnedPost.getPostID();
 
         assertFalse(formatUnpinned.startsWith("📌"), "Unpinned post should not have pin icon");
@@ -201,31 +201,5 @@ class PinPostFeatureTests {
         System.out.println("Posts correctly ordered: pinned first, then by ID DESC\n");
     }
 
-    // ========== SUMMARY ==========
-
-    /**
-     * SUMMARY OF TESTS
-     * 
-     * Test 1: Pin Single Post
-     *   - Verifies basic pin functionality works
-     *   - Checks admin name is recorded
-     * 
-     * Test 2: Unpin Post
-     *   - Verifies unpin functionality works
-     *   - Checks admin name is cleared
-     * 
-     * Test 3: Enforce Max Pin Limit
-     *   - Verifies maximum 3 pins constraint
-     *   - Verifies 4th pin is blocked
-     * 
-     * Test 4: Pin Icon Display
-     *   - Verifies visual indication works
-     *   - Checks formatted string for pin icon
-     * 
-     * Test 5: Post Ordering
-     *   - Verifies pinned posts appear first
-     *   - Verifies correct ordering within groups
-     * 
-     * All tests verify core functionality of the pin post feature
-     */
+  
 }
