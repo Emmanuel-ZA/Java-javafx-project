@@ -129,12 +129,14 @@ public class Database {
 	    statement.execute(invitationCodesTable);
 	}
 	
-	private void createPostTables() throws SQLException {  
+	private void createPostTables() throws SQLException {
 	    String postTable = "CREATE TABLE IF NOT EXISTS Post ("
 	            + "id INT AUTO_INCREMENT PRIMARY KEY, "
 	            + "author VARCHAR(255) NOT NULL, "
 	            + "content VARCHAR(500) NOT NULL, "
-	            + "authorRole VARCHAR(10))"; 
+	            + "authorRole VARCHAR(10), "
+	            + "isPinned BOOLEAN DEFAULT FALSE, "
+	            + "pinnedBy VARCHAR(255))";
 	    statement.execute(postTable);
 	}
 	
@@ -211,12 +213,13 @@ public class Database {
 	        
 	        // Check if we found a matching row (next() returns true if row exists)
 	        if (rs.next()) {
-	            // Create and return a new Post object with data from the database
 	            return new Post(
-	                rs.getInt("id"),              // Get the id column as an integer
-	                rs.getString("author"),       // Get the author column as a String
-	                rs.getString("content"),      // Get the content column as a String
-	                rs.getString("authorRole")    // Get the authorRole column as a String
+	                rs.getInt("id"),
+	                rs.getString("author"),
+	                rs.getString("content"),
+	                rs.getString("authorRole"),
+	                rs.getBoolean("isPinned"),
+	                rs.getString("pinnedBy")
 	            );
 	        }
 	    } catch (SQLException e) {
@@ -239,7 +242,7 @@ public class Database {
 	    
 	    // SQL query to select ALL rows and columns from the Post table
 	    // No WHERE clause means we get everything
-	    String query = "SELECT * FROM Post";
+	    String query = "SELECT * FROM Post ORDER BY isPinned DESC, id DESC";
 	    
 	    // try-with-resources ensures PreparedStatement is closed automatically
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -250,15 +253,14 @@ public class Database {
 	        // Loop through each row in the ResultSet
 	        // next() moves to the next row and returns false when no more rows exist
 	        while (rs.next()) {
-	            // Create a new Post object from the current row's data
 	            Post post = new Post(
-	                rs.getInt("id"),              // Extract id column
-	                rs.getString("author"),       // Extract author column
-	                rs.getString("content"),      // Extract content column
-	                rs.getString("authorRole")    // Extract authorRole column
+	                rs.getInt("id"),
+	                rs.getString("author"),
+	                rs.getString("content"),
+	                rs.getString("authorRole"),
+	                rs.getBoolean("isPinned"),
+	                rs.getString("pinnedBy")
 	            );
-	            
-	            // Add this Post object to our list
 	            posts.add(post);
 	        }
 	    } catch (SQLException e) {
@@ -1495,6 +1497,35 @@ public class Database {
 	        statement.execute("DELETE FROM InvitationCodes");
 	    } catch (SQLException e) {
 	        // Ignore errors if tables don't exist yet
+	    }
+	}
+	
+	public boolean pinPost(int postID, String pinnedBy) throws SQLException {
+	    String countQuery = "SELECT COUNT(*) AS pinnedCount FROM Post WHERE isPinned = TRUE";
+	    try (PreparedStatement countStmt = connection.prepareStatement(countQuery)) {
+	        ResultSet rs = countStmt.executeQuery();
+	        if (rs.next()) {
+	            int pinnedCount = rs.getInt("pinnedCount");
+	            if (pinnedCount >= 3) {
+	                return false;
+	            }
+	        }
+	    }
+	    String update = "UPDATE Post SET isPinned = TRUE, pinnedBy = ? WHERE id = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(update)) {
+	        pstmt.setString(1, pinnedBy);
+	        pstmt.setInt(2, postID);
+	        int rowsUpdated = pstmt.executeUpdate();
+	        return rowsUpdated > 0;
+	    }
+	}
+
+	public boolean unpinPost(int postID) throws SQLException {
+	    String update = "UPDATE Post SET isPinned = FALSE, pinnedBy = NULL WHERE id = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(update)) {
+	        pstmt.setInt(1, postID);
+	        int rowsUpdated = pstmt.executeUpdate();
+	        return rowsUpdated > 0;
 	    }
 	}
 

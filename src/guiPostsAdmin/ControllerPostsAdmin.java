@@ -532,6 +532,37 @@ public class ControllerPostsAdmin {
         ControllerPostsAdmin.performViewReplies();
     }
     
+    protected static void performTogglePinPost() {
+        String p = ViewPostsAdmin.list_Posts.getSelectionModel().getSelectedItem();
+        if (p == null || p.trim().isEmpty()) {
+            System.out.println("Need to select a Post");
+            return;
+        }
+        int id = ModelPostsAdmin.getID(p);
+        try {
+            Post post = ViewPostsAdmin.theDatabase.getPost(id);
+            if (post == null) {
+                System.out.println("Unable to load selected Post from database.");
+                return;
+            }
+            if (post.isPinned()) {
+                boolean success = ViewPostsAdmin.theDatabase.unpinPost(id);
+                if (!success) {
+                    System.out.println("Unable to unpin post.");
+                }
+            } else {
+                String pinnedBy = ViewPostsAdmin.theUser.getUserName();
+                boolean success = ViewPostsAdmin.theDatabase.pinPost(id, pinnedBy);
+                if (!success) {
+                    System.out.println("Cannot pin more than 3 posts at a time.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        performViewPosts();
+    }
+    
     // ===================== NAVIGATION METHODS ===================
     
     /*******

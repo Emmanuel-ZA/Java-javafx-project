@@ -360,6 +360,9 @@ public class Post {
      */
     private String authorRole;
     
+    private boolean isPinned;
+    private String pinnedBy;
+    
     // ==================== CONSTRUCTOR ====================
     
     /**
@@ -421,11 +424,13 @@ public class Post {
      * @see database.Database#getAllPosts()
      * @see database.Database#getPostsByAuthor(String)
      */
-    public Post(int id, String author, String content, String authorRole) {
+    public Post(int id, String author, String content, String authorRole, boolean isPinned, String pinnedBy) {
         this.id = id;
         this.author = author;
         this.content = content;
         this.authorRole = authorRole;
+        this.isPinned = isPinned;
+        this.pinnedBy = pinnedBy;
     }
     
     // ==================== GETTERS ====================
@@ -649,6 +654,8 @@ public class Post {
         return this.authorRole;
     }
     
+    
+    
     // ==================== SETTERS ====================
     
     /**
@@ -786,6 +793,12 @@ public class Post {
         this.content = content;
     }
     
+    public void setAuthorRole(String authorRole) {
+        this.authorRole = authorRole;
+    }
+    
+    
+    // ================= NEW FUNCTION ====================
     /**
      * Sets the author's role for this post.
      * 
@@ -867,8 +880,22 @@ public class Post {
      *                   once during post creation. Do NOT change this field after creation
      *                   unless performing data migration for legacy posts.
      */
-    public void setAuthorRole(String authorRole) {
-        this.authorRole = authorRole;
+ 
+    
+    public boolean isPinned() {
+        return this.isPinned;
+    }
+
+    public String getPinnedBy() {
+        return this.pinnedBy;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.isPinned = pinned;
+    }
+
+    public void setPinnedBy(String pinnedBy) {
+        this.pinnedBy = pinnedBy;
     }
     
     // ==================== UTILITY METHODS ====================

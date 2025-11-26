@@ -78,6 +78,7 @@ public class ViewPostsAdmin {
 	protected static Button button_CreatePost = new Button("Create Post");
 	protected static Button button_DeletePost = new Button("Delete Post");
 	protected static Button button_EditPost = new Button("Edit Post");
+	protected static Button button_PinPost = new Button("Pin / Unpin Post");
 	
 	// Create post panel buttons
 	protected static Button button_SubmitPost = new Button("Submit Post");
@@ -253,8 +254,13 @@ public class ViewPostsAdmin {
         	ControllerPostsAdmin.performEditPost();
         });
         
+        setupButtonUI(button_PinPost, "Dialog", 18, 250, Pos.CENTER, 500, 350);
+        button_PinPost.setOnAction((event) -> {
+            ControllerPostsAdmin.performTogglePinPost();
+        });
+        
         // Set up "Go Back Home" button
-        setupButtonUI(button_back, "Dialog", 18, 250, Pos.CENTER, 500, 350);
+        setupButtonUI(button_back, "Dialog", 18, 250, Pos.CENTER, 500, 400);
         button_back.setOnAction((event) -> {
         	// When clicked, return to Admin Home page
         	ControllerPostsAdmin.performBack();
@@ -278,7 +284,7 @@ public class ViewPostsAdmin {
         // The order here doesn't affect visual layering (z-index is automatic)
         postsPanel.getChildren().addAll(
         		button_Logout, button_Quit, button_viewReplies, button_DeletePost,
-        		button_EditPost, button_CreatePost, list_Posts, label_ViewPostsTitle, button_back
+        		button_EditPost, button_CreatePost, list_Posts, label_ViewPostsTitle, button_back, button_PinPost
         );
 	}
 	
@@ -308,6 +314,8 @@ public class ViewPostsAdmin {
 			// When clicked, create the post in database
 			ControllerPostsAdmin.performSubmitPost();
 		});
+		
+		
 
 		// Set up "Cancel" button
         setupButtonUI(button_CancelPost, "Dialog", 18, 250, Pos.CENTER, 500, 250);

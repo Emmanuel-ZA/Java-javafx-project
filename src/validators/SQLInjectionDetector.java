@@ -90,10 +90,10 @@ public class SQLInjectionDetector {
     };
     
     // SQL comment patterns that could be used to hide or escape SQL code
-    private static final String[] SQL_COMMENTS = {"--", "/*", "*/", "#"};
+    private static final String[] SQL_COMMENTS = {"--", "/*", "*/"};
     
     // Suspicious SQL operators in login context (quotes and statement separators)
-    private static final String[] SQL_OPERATORS = {"'", "\"", ";"};
+    //private static final String[] SQL_OPERATORS = {"'", "\"", ";"};
     
     /**
      * <p><strong>Method:</strong> detectSQLInjection</p>

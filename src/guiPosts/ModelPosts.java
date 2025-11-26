@@ -173,12 +173,11 @@ public class ModelPosts {
      * @see guiPosts.ControllerPosts#performViewPosts()
      */
     protected static String formatPostForDisplay(Post post) {
-        // Get role, defaulting to "Unknown" if null (legacy posts)
         String role = post.getAuthorRole() != null ? post.getAuthorRole() : "Unknown";
-        
-        // Build formatted string with role badge in brackets
-        return "id: " + post.getPostID() + 
-               " author: " + post.getAuthor() + 
+        String pinMarker = post.isPinned() ? "📌 " : "";
+        return pinMarker +
+               "id: " + post.getPostID() +
+               " author: " + post.getAuthor() +
                " [" + role + "] " +
                "content: " + post.getContent();
     }

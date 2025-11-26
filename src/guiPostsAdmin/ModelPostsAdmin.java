@@ -49,26 +49,24 @@ public class ModelPostsAdmin {
      * 
      * @return the extracted ID as an integer
      */
-    protected static int getID(String s) {
-        // Split the string at " author: " to isolate the first part
-        // Example: "id: 5 author: john" becomes ["id: 5", "john [Admin]..."]
-        String[] stuff1 = s.split(" author: ");
-        
-        // Take the first element (everything before " author: ")
-        // This gives us "id: 5"
-        String temp = stuff1[0];
-        
-        // Split this by space to separate "id:" from the number
-        // "id: 5" becomes ["id:", "5"]
-        String[] stuff2 = temp.split(" ");
-        
-        // Take the second element (index 1) which is the ID number
-        // Convert the String "5" to integer 5
-        int id = Integer.parseInt(stuff2[1]);
-        
-        // Return the extracted ID
-        return id;
-    }
+	protected static int getID(String s) {
+	    if (s == null) {
+	        throw new NumberFormatException("Post string is null");
+	    }
+	    String[] stuff1 = s.split(" author: ");
+	    if (stuff1.length == 0) {
+	        throw new NumberFormatException("Unable to split on ' author: ' in: " + s);
+	    }
+	    String temp = stuff1[0].trim();
+	    String[] tokens = temp.split("\\s+");
+	    for (String token : tokens) {
+	        String cleaned = token.replace(":", "").trim();
+	        if (cleaned.matches("\\d+")) {
+	            return Integer.parseInt(cleaned);
+	        }
+	    }
+	    throw new NumberFormatException("Unable to extract numeric ID from: " + s);
+	}
     
     /*******
      * <p> Method: formatPostForDisplay </p>
@@ -91,20 +89,15 @@ public class ModelPostsAdmin {
      * 
      * @return a formatted String ready for display
      */
-    protected static String formatPostForDisplay(Post post) {
-        // Get the role from the post, or use "Unknown" if it's null
-        // The ternary operator (? :) is a shorthand if-else statement
-        // Syntax: condition ? valueIfTrue : valueIfFalse
-        String role = post.getAuthorRole() != null ? post.getAuthorRole() : "Unknown";
-        
-        // Build and return the formatted string
-        // Uses string concatenation (+) to join the pieces
-        // Format: "id: X author: username [Role] content: text"
-        return "id: " + post.getPostID() + 
-               " author: " + post.getAuthor() + 
-               " [" + role + "] " +              // Role in brackets for visibility
-               "content: " + post.getContent();
-    }
+	protected static String formatPostForDisplay(Post post) {
+	    String role = post.getAuthorRole() != null ? post.getAuthorRole() : "Unknown";
+	    String pinMarker = post.isPinned() ? "📌 " : "";
+	    return pinMarker +
+	           "id: " + post.getPostID() +
+	           " author: " + post.getAuthor() +
+	           " [" + role + "] " +
+	           "content: " + post.getContent();
+	}
     
     /*******
      * <p> Method: formatReplyForDisplay </p>
