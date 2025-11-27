@@ -116,11 +116,12 @@ public class ViewRole1Home {
 	 * 
 	 */
 	public static void displayRole1Home(Stage ps, User user) {
-		
-		ControllerRole1Home.updateReplyAlert();
+	
 		// Establish the references to the GUI and the current user
 		theStage = ps;
 		theUser = user;
+		
+		ControllerRole1Home.updateReplyAlert();
 		
 		
 		text_Post.setText(""); // set post text equal to nothing

@@ -114,12 +114,11 @@ public class ViewRole2Home {
 	 */
 	public static void displayRole2Home(Stage ps, User user) {
 		
-		ControllerRole2Home.updateReplyAlert();
-
 		// Establish the references to the GUI and the current user
 		theStage = ps;
 		theUser = user;
 		
+		ControllerRole2Home.updateReplyAlert();
 		// If not yet established, populate the static aspects of the GUI
 		if (theView == null) theView = new ViewRole2Home();		// Instantiate singleton if needed
 		

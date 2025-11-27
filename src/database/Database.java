@@ -87,8 +87,9 @@ public class Database {
 			Class.forName(JDBC_DRIVER); // Load the JDBC driver
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
-			// You can use this command to clear the database and restart from fresh.
-			statement.execute("DROP ALL OBJECTS");
+			
+			//UNCOMMENT TO DELETE DB AND RUN CERTAIN JUNIT TESTS
+			//statement.execute("DROP ALL OBJECTS");
 
 			createTables();  // Create the necessary tables if they don't exist
 			createPostTables();

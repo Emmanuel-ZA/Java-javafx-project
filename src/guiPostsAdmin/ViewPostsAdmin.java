@@ -135,18 +135,20 @@ public class ViewPostsAdmin {
 	 * @param ps the JavaFX Stage to display on
 	 * @param user the currently logged-in admin user
 	 */
-	public static void displayPostsAdmin(Stage ps, User user) {
-		// Store references for use throughout this class
-		theStage = ps;
-		theUser = user;
 	
-		// Singleton check: create view only if it doesn't exist
-		if (theView == null) {
-			theView = new ViewPostsAdmin();		// Create and initialize the GUI
-		}
-		
-		// Set the scene on the stage and show it
-		theStage.setScene(mainScene);
+	public static void displayPostsAdmin(Stage ps, User user) {
+	    // Establish the references to the GUI and the current user
+	    theStage = ps;
+	    theUser = user;
+
+	    // If not yet established, populate the static aspects of the GUI
+	    if (theView == null) {
+	        theView = new ViewPostsAdmin();
+	    }
+	    
+	    ControllerPostsAdmin.performViewPosts();
+	    
+	    theStage.setScene(mainScene);
 	    theStage.show();
 	}
 	
